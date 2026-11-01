@@ -218,7 +218,7 @@ flowchart TD
 - [x] Build reusable UI primitives: Flat pill buttons, hairline dividers, paper cards, bottom sheet containers, themed flat linear progress bars, and thin-stroke ink spinners.
 
 ### Milestone 2: Hive Local Storage & Document Library
-- [ ] Define Hive models & TypeAdapters: `DocumentModel`, `HighlightModel`, `UserSettingsModel`, `DailyUsageModel`.
+- [x] Define Hive models & TypeAdapters: `DocumentModel`, `HighlightModel`, `UserSettingsModel`, `DailyUsageModel`.
 - [ ] Implement `LibraryBloc` for document lifecycle:
   - Import PDF via `file_picker`, copy to local sandbox directory.
   - Populate library grid/list with thumbnail or icon (`PhosphorIcons.filePdf`), page count, and highlight count.
