@@ -4,9 +4,11 @@ import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_typography.dart';
 import 'core/widgets/widgets.dart';
+import 'data/local/hive_service.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await HiveService.init();
   runApp(const NotaApp());
 }
 
