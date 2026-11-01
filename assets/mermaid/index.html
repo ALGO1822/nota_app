@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+  <title>Nota Diagram Viewer</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #EAE3D3;
+      color: #17120D;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    #container {
+      width: 100%;
+      min-height: 100%;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform-origin: center center;
+      transition: transform 0.15s ease-out;
+    }
+    .mermaid {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    svg {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+  </style>
+  <script src="mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        darkMode: false,
+        background: '#EAE3D3',
+        mainBkg: '#EAE3D3',
+        textColor: '#17120D',
+        lineColor: '#17120D',
+        primaryColor: '#EAE3D3',
+        primaryTextColor: '#17120D',
+        primaryBorderColor: '#17120D',
+        secondaryColor: '#EAE3D3',
+        secondaryTextColor: '#17120D',
+        secondaryBorderColor: '#17120D',
+        tertiaryColor: '#EAE3D3',
+        tertiaryTextColor: '#17120D',
+        tertiaryBorderColor: '#17120D',
+        edgeLabelBackground: '#EAE3D3',
+        clusterBkg: '#EAE3D3',
+        clusterBorder: '#17120D',
+        fontFamily: 'Inter, sans-serif',
+        fontSize: '13px'
+      },
+      flowchart: {
+        htmlLabels: true,
+        curve: 'basis',
+        nodeSpacing: 40,
+        rankSpacing: 40
+      }
+    });
+
+    let currentZoom = 1.0;
+
+    async function renderDiagram(graphDefinition) {
+      const container = document.getElementById('container');
+      try {
+        container.innerHTML = '';
+        const id = 'mermaid-' + Date.now();
+        const { svg } = await mermaid.render(id, graphDefinition);
+        container.innerHTML = svg;
+        currentZoom = 1.0;
+        applyZoom();
+        if (window.FlutterChannel) {
+          window.FlutterChannel.postMessage(JSON.stringify({ status: 'success' }));
+        }
+      } catch (err) {
+        container.innerHTML = '<div style="color: #17120D; font-size: 13px; opacity: 0.7; padding: 20px; text-align: center;">Unable to render diagram</div>';
+        if (window.FlutterChannel) {
+          window.FlutterChannel.postMessage(JSON.stringify({ status: 'error', error: err.toString() }));
+        }
+      }
+    }
+
+    function zoomIn() {
+      currentZoom = Math.min(currentZoom + 0.25, 3.0);
+      applyZoom();
+    }
+
+    function zoomOut() {
+      currentZoom = Math.max(currentZoom - 0.25, 0.5);
+      applyZoom();
+    }
+
+    function resetZoom() {
+      currentZoom = 1.0;
+      applyZoom();
+    }
+
+    function applyZoom() {
+      const svg = document.querySelector('#container svg');
+      if (svg) {
+        svg.style.transform = 'scale(' + currentZoom + ')';
+        svg.style.transformOrigin = 'center center';
+        svg.style.transition = 'transform 0.15s ease-out';
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="container">
+    <div style="font-size: 12px; color: #17120D; opacity: 0.5; font-family: monospace;">No diagram loaded</div>
+  </div>
+</body>
+</html>
