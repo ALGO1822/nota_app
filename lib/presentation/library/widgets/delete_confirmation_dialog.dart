@@ -3,27 +3,31 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 
-/// Modal dialog confirming document deletion and warning that local highlights will be removed.
+/// Modal dialog matching Page 12 of the Nota UI Design specification.
 class DeleteConfirmationDialog extends StatelessWidget {
-  final int count;
+  final int documentCount;
+  final int highlightCount;
   final VoidCallback onConfirm;
 
   const DeleteConfirmationDialog({
     super.key,
-    required this.count,
+    required this.documentCount,
+    this.highlightCount = 0,
     required this.onConfirm,
   });
 
   static Future<bool?> show({
     required BuildContext context,
-    required int count,
+    required int documentCount,
+    int highlightCount = 0,
     required VoidCallback onConfirm,
   }) {
     return showDialog<bool>(
       context: context,
       barrierColor: AppColors.scrim,
       builder: (ctx) => DeleteConfirmationDialog(
-        count: count,
+        documentCount: documentCount,
+        highlightCount: highlightCount,
         onConfirm: onConfirm,
       ),
     );
@@ -31,10 +35,14 @@ class DeleteConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String title = count == 1 ? 'Delete document?' : 'Delete $count documents?';
-    final String description = count == 1
-        ? 'This will remove the document and all of its highlights from Nota. The original file on your device will remain untouched.'
-        : 'This will remove $count documents and their highlights from Nota. Original files on your device remain untouched.';
+    final String title = documentCount == 1 ? 'Delete document?' : 'Delete $documentCount documents?';
+    final String description = documentCount == 1
+        ? (highlightCount > 0
+            ? 'Its $highlightCount ${highlightCount == 1 ? 'highlight is' : 'highlights are'} removed too. The original PDF stays on your device.'
+            : 'Its highlights are removed too. The original PDF stays on your device.')
+        : (highlightCount > 0
+            ? 'Their $highlightCount highlights are removed too. The original PDFs stay on your device.'
+            : 'Their highlights are removed too. The original PDFs stay on your device.');
 
     return Dialog(
       backgroundColor: AppColors.paper,
@@ -50,22 +58,31 @@ class DeleteConfirmationDialog extends StatelessWidget {
           children: [
             Text(title, style: AppTypography.headlineMedium),
             const SizedBox(height: 12),
-            Text(description, style: AppTypography.bodyMedium),
+            Text(
+              description,
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.muted,
+                height: 1.4,
+              ),
+            ),
             const SizedBox(height: 24),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                NotaPillButton.subtle(
-                  label: 'Cancel',
-                  onPressed: () => Navigator.of(context).pop(false),
+                Expanded(
+                  child: NotaPillButton.outlined(
+                    label: 'Cancel',
+                    onPressed: () => Navigator.of(context).pop(false),
+                  ),
                 ),
                 const SizedBox(width: 12),
-                NotaPillButton(
-                  label: 'Delete',
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                    onConfirm();
-                  },
+                Expanded(
+                  child: NotaPillButton(
+                    label: 'Delete',
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                      onConfirm();
+                    },
+                  ),
                 ),
               ],
             ),

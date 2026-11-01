@@ -8,6 +8,30 @@ enum LibraryStatus {
   failure,
 }
 
+/// Notification type matching Page 10 of UI Design.
+enum SnackBarType {
+  info,
+  success,
+  warning,
+}
+
+class LibraryNotification extends Equatable {
+  final String title;
+  final String? subtitle;
+  final SnackBarType type;
+  final bool hasUndo;
+
+  const LibraryNotification({
+    required this.title,
+    this.subtitle,
+    this.type = SnackBarType.info,
+    this.hasUndo = false,
+  });
+
+  @override
+  List<Object?> get props => [title, subtitle, type, hasUndo];
+}
+
 /// Immutable state emitted by [LibraryBloc].
 class LibraryState extends Equatable {
   final LibraryStatus status;
@@ -16,7 +40,8 @@ class LibraryState extends Equatable {
   final bool isSelectionMode;
   final Set<String> selectedDocumentIds;
   final List<DocumentModel> recentlyDeletedDocuments;
-  final String? userMessage;
+  final String searchQuery;
+  final LibraryNotification? notification;
   final String? errorMessage;
 
   const LibraryState({
@@ -26,14 +51,32 @@ class LibraryState extends Equatable {
     this.isSelectionMode = false,
     this.selectedDocumentIds = const {},
     this.recentlyDeletedDocuments = const [],
-    this.userMessage,
+    this.searchQuery = '',
+    this.notification,
     this.errorMessage,
   });
 
   bool get isEmpty => documents.isEmpty;
+  int get documentCount => documents.length;
   int get selectedCount => selectedDocumentIds.length;
   bool isSelected(String docId) => selectedDocumentIds.contains(docId);
   bool isFileMissing(String docId) => fileExistsMap[docId] == false;
+
+  /// Returns documents filtered by search query.
+  List<DocumentModel> get filteredDocuments {
+    if (searchQuery.trim().isEmpty) {
+      return documents;
+    }
+    final q = searchQuery.toLowerCase().trim();
+    return documents.where((d) => d.title.toLowerCase().contains(q)).toList();
+  }
+
+  /// Calculates total highlights across all currently selected documents (Page 11).
+  int get selectedHighlightCount {
+    return documents
+        .where((d) => selectedDocumentIds.contains(d.id))
+        .fold(0, (sum, d) => sum + d.highlightCount);
+  }
 
   LibraryState copyWith({
     LibraryStatus? status,
@@ -42,9 +85,10 @@ class LibraryState extends Equatable {
     bool? isSelectionMode,
     Set<String>? selectedDocumentIds,
     List<DocumentModel>? recentlyDeletedDocuments,
-    String? userMessage,
+    String? searchQuery,
+    LibraryNotification? notification,
     String? errorMessage,
-    bool clearMessage = false,
+    bool clearNotification = false,
     bool clearError = false,
   }) {
     return LibraryState(
@@ -54,7 +98,8 @@ class LibraryState extends Equatable {
       isSelectionMode: isSelectionMode ?? this.isSelectionMode,
       selectedDocumentIds: selectedDocumentIds ?? this.selectedDocumentIds,
       recentlyDeletedDocuments: recentlyDeletedDocuments ?? this.recentlyDeletedDocuments,
-      userMessage: clearMessage ? null : (userMessage ?? this.userMessage),
+      searchQuery: searchQuery ?? this.searchQuery,
+      notification: clearNotification ? null : (notification ?? this.notification),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
@@ -67,7 +112,8 @@ class LibraryState extends Equatable {
         isSelectionMode,
         selectedDocumentIds,
         recentlyDeletedDocuments,
-        userMessage,
+        searchQuery,
+        notification,
         errorMessage,
       ];
 }

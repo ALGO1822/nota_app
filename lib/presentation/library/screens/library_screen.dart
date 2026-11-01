@@ -106,7 +106,7 @@ class LibraryScreen extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.all(20.0),
       itemCount: state.documents.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12.0),
+      separatorBuilder: (_, index) => const SizedBox(height: 12.0),
       itemBuilder: (context, index) {
         final doc = state.documents[index];
         final bool isMissing = state.isFileMissing(doc.id);

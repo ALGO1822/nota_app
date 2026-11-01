@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/widgets.dart';
 
 /// Contextual app bar transitioning smoothly between normal and multi-select modes.
 class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {

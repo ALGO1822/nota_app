@@ -18,6 +18,15 @@ class ImportDocumentEvent extends LibraryEvent {
   const ImportDocumentEvent();
 }
 
+/// Filters loaded documents by search query.
+class SearchDocumentsEvent extends LibraryEvent {
+  final String query;
+  const SearchDocumentsEvent(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}
+
 /// Toggles whether multi-select mode is currently active.
 class ToggleSelectionModeEvent extends LibraryEvent {
   final bool? enable;
@@ -81,4 +90,9 @@ class RemoveMissingDocumentEvent extends LibraryEvent {
 
   @override
   List<Object?> get props => [documentId];
+}
+
+/// Clears the transient user message after it has been displayed.
+class ClearUserMessageEvent extends LibraryEvent {
+  const ClearUserMessageEvent();
 }
